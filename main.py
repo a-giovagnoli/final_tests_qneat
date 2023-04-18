@@ -34,7 +34,7 @@ graph = [(0,1), (0,6), (0,7), (1,2), (1,6), (2,4), (2,7), (3,7), (3,6), (4,5), (
 
 # population parameters
 QUBITS = n_nodes
-
+GRAPH = graph
 N_AGENTS = 5
 TOP_LIMIT = 5
 NUM_GENERATIONS = 1
@@ -56,6 +56,7 @@ DYNAMIC_MUT_POWER = True
 
 # options
 Options.set_options(num_inputs=QUBITS,
+                    graph = GRAPH,
                     population_size=N_AGENTS,
                     
                     num_initial_layers=INITIAL_LAYERS,
@@ -142,6 +143,7 @@ for ALPHA in [False, 0.3]:
         
         # options
         Options.set_options(num_inputs=QUBITS,
+                    graph=GRAPH,
                     population_size=N_AGENTS,
                     
                     num_initial_layers=INITIAL_LAYERS,
@@ -169,10 +171,11 @@ for ALPHA in [False, 0.3]:
         for i in range(2):
             run = wandb.init(
                 project='Final-Experiment-Comb-Optim-QNEAT',
-                entity='a-giovagnoli',
+                entity='s-egger',
                 config={
 
                     'num_inputs': QUBITS,
+                    'graph': GRAPH,
                     'population_size': N_AGENTS,
 
                     'num_initial_layers': INITIAL_LAYERS,

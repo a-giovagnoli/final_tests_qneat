@@ -18,6 +18,7 @@ class Options:
     @staticmethod
     def set_options(
         num_inputs,
+        graph,
         population_size,
 
         num_initial_layers=1,
@@ -70,6 +71,7 @@ class Options:
         
     ):
         Options.num_inputs = num_inputs
+        Options.graph = graph
         Options.population_size = population_size
         
         Options.num_initial_layers = num_initial_layers
@@ -334,7 +336,15 @@ class Brain:
         
 #         for i, s in enumerate(inputs):
 #             qml.RX(np.arctan(s), wires=i)
-            
+
+    def _generalize(self, theta, graph):
+        for edge in graph:
+            wire1 = edge[0]
+            wire2 = edge[1]
+            qml.CNOT(wires = [wire1, wire2])
+            qml.RZ(theta, wires=wire2 )            
+            qml.CNOT(wires = [wire1, wire2])
+
     def _place_gates(self):
         
         # get all the layers of each cnot
@@ -394,6 +404,8 @@ class Brain:
             edge_1 = inputs[0]
             edge_2 = inputs[1]
         
+        # encoding to generalize
+        self._generalize(np.pi, Options.graph)
         
         # apply rots and cnots
         self._place_gates()
