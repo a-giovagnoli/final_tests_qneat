@@ -202,8 +202,8 @@ class InnovTable:
 
         return InnovTable.inn_gates_hist[gate_type][layer, wire]
 
-
-class Brain:
+angle_weight = [0,0,0]
+class Brain:   
     def __init__(self, gates=None, layers=[None]):
         self.fitness = 0
         
@@ -300,16 +300,18 @@ class Brain:
         # with a probability threshold, add a new cnot
         if random.random() < Options.add_cnot_prob and len(self.gates['cnot']) < Options.max_cnots:
             self._add_gate('cnot')
-        
+        global angle_weight
         for rot in self.gates['rot']:
             # with a probability threshold, change the weight, between
             if random.random() < Options.weight_mutate_prob:
                 # giving a completely new one
                 if random.random() < Options.new_weight_prob:
                     rot['weights'] = [random.uniform(-1, 1)*Options.weight_init_range for _ in range(3)]
+                    angle_weight = rot['weights']
                 # or adding on the existing one
                 else:
                     rot['weights'] += np.array([random.uniform(-1, 1)*Options.weight_mutate_power for _ in range(3)])
+                    angle_weight = rot['weights']
         
     def _valid_gate(self, layer, wire, gate_type):
         
@@ -405,7 +407,7 @@ class Brain:
             edge_2 = inputs[1]
         
         # encoding to generalize
-        self._generalize(np.pi, Options.graph)
+        self._generalize(angle_weight[2], Options.graph)
         
         # apply rots and cnots
         self._place_gates()
