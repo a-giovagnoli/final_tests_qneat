@@ -5,6 +5,7 @@ import numpy as np
 import gym
 import matplotlib.pyplot as plt
 import math
+import csv
 
 # convert the array of measurements e.g. [0,1,1,0] into a string 0110
 def bitstring_to_int(bit_string_sample):
@@ -20,17 +21,16 @@ def bitstring_to_int(bit_string_sample):
 def run_qvc(qvc, graph, alpha=0):
     """
     evaluate qvc
-    """
-        
+    """   
     # alpha for CVaR
     if alpha:
         single_edge_samples = []
         for edge in graph:
             prediction = qvc.predict(edge)
             single_edge_samples.append(prediction)
-
         hamiltonians = []
-        for list_of_measurements in zip(*single_edge_samples):
+        for list_of_measurements in zip(single_edge_samples):
+            
             hamiltonians.append( sum( [0.5 * (1- z_iz_j) for z_iz_j in list_of_measurements] ).item() )
             
         
@@ -65,7 +65,7 @@ def hamiltonian(config, graph):
     
     return H
 
-
+avg = []
 
 def test_best_agent(qvc, num_nodes, graph):
     
@@ -88,13 +88,21 @@ def test_best_agent(qvc, num_nodes, graph):
        
     average_energy = sum(samples_energies)/len(samples_energies)
     print('average energy:', average_energy)
-        
+    global avg
+    avg.append(average_energy)
+    #with open ('Caveman3TestAverageEnergy.csv', 'w', newline='') as file:
+     #   writer = csv.writer(file)
+      #  writer.writerow(avg)   
 
     # print optimal parameters and most frequently sampled bitstring
     counts = np.bincount(np.array(bit_strings))
     most_freq_bit_string = np.argmax(counts)
     
     print("Most frequently sampled bit string is: {:08b}".format(most_freq_bit_string))
+    
+#    with open ('RandomTestBitstring.csv', 'w', newline='') as file1:
+#        writer = csv.writer(file1)
+#        writer.writerow([most_freq_bit_string])
     
     xticks = range(0, 2**num_nodes)
     xtick_labels = list(map(lambda x: format(x, "0{}b".format(num_nodes)), xticks))
@@ -121,15 +129,15 @@ def test_best_agent(qvc, num_nodes, graph):
 
     # Write on top of bar: https://www.tutorialspoint.com/how-to-write-text-above-the-bars-on-a-bar-plot-python-matplotlib
 
-    from matplotlib.pyplot import figure
-    figure(figsize=(10, 6))
+    #from matplotlib.pyplot import figure
+    #figure(figsize=(10, 6))
 
-    plt.title("n_layers=1")
-    plt.xlabel("bitstrings")
-    plt.ylabel("freq.")
-    plt.xticks(xticks, final_xticks_labels, rotation="vertical", fontsize=4)
-    plt.hist(bit_strings, bins=bins)
-    plt.show()
+    #plt.title("n_layers=1")
+    #plt.xlabel("bitstrings")
+    #plt.ylabel("freq.")
+    #plt.xticks(xticks, final_xticks_labels, rotation="vertical", fontsize=4)
+    #plt.hist(bit_strings, bins=bins)
+    #plt.show()
 
 
     
@@ -143,7 +151,6 @@ def scan_best_agent(env, pool):
     scores = [float(brain.fitness) for brain in pool]
     indices = np.argsort(np.array(scores))[-1:]
     print('Best score: ', np.array(scores)[indices][0])
-    
     # select it
     agent = np.array(pool)[indices][0]
     

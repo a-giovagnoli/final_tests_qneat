@@ -8,6 +8,7 @@ import numpy as np
 import pennylane as qml
 import gym
 import matplotlib.pyplot as plt
+import csv
 
 from utils import scan_best_agent
 
@@ -202,7 +203,7 @@ class InnovTable:
 
         return InnovTable.inn_gates_hist[gate_type][layer, wire]
 
-angle_weight = [0,0,0]
+mut_weights = [0,0, np.pi/2]    
 class Brain:   
     def __init__(self, gates=None, layers=[None]):
         self.fitness = 0
@@ -291,28 +292,35 @@ class Brain:
             if layer == last_layer:
                 self.layers_indices.add(last_layer + 1)
                 
-            
+    def set_weights(weights):
+        global mut_weights
+        mut_weights = weights 
+    
     def mutate(self):
         # with a probability threshold, add a new rotation gate
+        weight = []
         if random.random() < Options.add_rot_prob and len(self.gates['rot']) < Options.max_rots:
             self._add_gate('rot')
 
         # with a probability threshold, add a new cnot
         if random.random() < Options.add_cnot_prob and len(self.gates['cnot']) < Options.max_cnots:
             self._add_gate('cnot')
-        global angle_weight
         for rot in self.gates['rot']:
             # with a probability threshold, change the weight, between
             if random.random() < Options.weight_mutate_prob:
                 # giving a completely new one
                 if random.random() < Options.new_weight_prob:
                     rot['weights'] = [random.uniform(-1, 1)*Options.weight_init_range for _ in range(3)]
-                    angle_weight = rot['weights']
-                # or adding on the existing one
+                    weight = rot['weights']                # or adding on the existing one
                 else:
                     rot['weights'] += np.array([random.uniform(-1, 1)*Options.weight_mutate_power for _ in range(3)])
-                    angle_weight = rot['weights']
-        
+                    weight = rot['weights']          
+        global mut_weights
+        mut_weights = [weight[0], weight[1], weight[2]]
+        with open('Weights.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(mut_weights)    
+
     def _valid_gate(self, layer, wire, gate_type):
         
         
@@ -339,7 +347,7 @@ class Brain:
 #         for i, s in enumerate(inputs):
 #             qml.RX(np.arctan(s), wires=i)
 
-    def _generalize(self, theta, graph):
+    def _feature_map(self, theta, graph):
         for edge in graph:
             wire1 = edge[0]
             wire2 = edge[1]
@@ -401,24 +409,24 @@ class Brain:
             qml.Hadamard(wires=i)
 
         
-        # get the edges, if there are any
+       # get the edges, if there are any
         if inputs is not None:
             edge_1 = inputs[0]
             edge_2 = inputs[1]
-        
+
         # encoding to generalize
-        self._generalize(angle_weight[2], Options.graph)
+        self._feature_map(mut_weights[2] , Options.graph)
         
+
         # apply rots and cnots
         self._place_gates()
-        
         
         # se non vengono passati edges, allora si sta solo valutando
         if inputs is None:
             # measurement phase
-            return qml.sample()
+           return qml.sample()
     
-        
+       
         # during the optimization phase we are evaluating the term Zi*Zj which will go into 1/2 * (1 - Zi*Zj)
         H = qml.PauliZ(edge_1) @ qml.PauliZ(edge_2)
 
@@ -428,11 +436,79 @@ class Brain:
         
         if Options.cvar:
             return qml.sample(H)
-        
-        
+
         return qml.expval(H)
-    
-            
+
+##    def _circuit(self, inputs=None):
+##        for i in range(Options.num_inputs):
+##            qml.Hadamard(wires=i)
+##
+##
+##        if inputs is not None:
+##          edge_1 = inputs[0]
+##          edge_2 = inputs[1]
+##
+##       for edge in Options.graph:
+##            wire1 = edge[0]
+##            wire2 = edge[1]
+##            qml.CNOT(wires = [wire1, wire2])
+##            qml.RZ(np.pi/2, wires=wire2 )            
+##            qml.CNOT(wires = [wire1, wire2])
+##
+##        for i in range(Options.num_inputs):
+##            qml.CNOT(wires=[i, (i+1)%8])
+##
+##        qml.Rot(2.01, -0.18, 2.02, wires=0)
+##        qml.Rot(-0.43, 2.88, -1.76, wires=1)
+##        qml.Rot(2.39, -3.03, -2.23, wires=2)
+##        qml.Rot(1.86, -0.62, -0.23, wires=3)
+##        qml.Rot(1.03, -2.95, 0.75, wires=4)
+##        qml.Rot(-0.69, -2.76, 3.01, wires=5)
+##        qml.Rot(-1.41, -3.12, -2.37, wires=6)
+##        qml.Rot(1.62, 1.89, 0.77, wires=7)
+##
+##        for i in range(Options.num_inputs):
+##            qml.CNOT(wires=[i, (i+1)%8])
+##
+##        qml.Rot(-1.93, 0.83, 1.78, wires=0)
+##        qml.Rot(-1.28, -0.35, -1.98, wires=1)
+##        qml.Rot(1.52, -2.71, -2.24, wires=2)
+##        qml.Rot(1.08, -3.04, -1.40, wires=3)
+##        qml.Rot(-1.26, 0.48, 1.76, wires=4)
+##        qml.Rot(-1.00, -1.84, 0.15, wires=5)
+##        qml.Rot(-0.85, 0.93, 0.79, wires=6)
+##        qml.Rot(-2.41, 1.55, 1.62, wires=7)
+##
+##        qml.CNOT(wires=[0,1])
+##        qml.CNOT(wires=[3,4])
+##        qml.CNOT(wires=[5,6])
+##        qml.CNOT(wires=[7,0])
+##
+##        qml.CNOT(wires=[0,1])
+##        qml.Rot(0.38, 1.70, 0.98, wires=2)
+##        qml.CNOT(wires=[3,4])
+##        qml.Rot(1.55, -0.97, 1.10, wires=5)
+##        qml.Rot(2.68, 1.71, 1.72, wires=7)
+##
+##        qml.CNOT(wires=[5,6])
+##        qml.CNOT(wires=[7,0])
+##
+##        qml.CNOT(wires=[0,1])
+##        qml.CNOT(wires=[2,3])
+##        qml.Rot(-2.50, -0.44, 2.17, wires=4)
+##        qml.Rot(2.10, -1.03, -1.95, wires=5)
+##        qml.Rot(-2.45, -0.87, -1.06, wires=6)
+##        qml.Rot(0.44, -0.22, -0.85, wires=7)
+##        qml.Rot(-1.28, 1.36, -0.06, wires=3)
+##        qml.CNOT(wires=[2,3])
+##
+##        if inputs is None:
+##            return qml.sample()
+##
+##        H = qml.PauliZ(edge_1) @ qml.PauliZ(edge_2)
+##
+##        return qml.expval(H)       
+
     def predict(self, inputs, test=False):
         if test:
             return self.qnode_test()
@@ -655,7 +731,7 @@ class Population:
 
         Gate.init_pos()
 
-    def evaluate(self, eval_func, report=True):
+    def evaluate(self, eval_func, graph, report=True):
         
         for generation in range(Options.num_generations):
             
@@ -663,8 +739,7 @@ class Population:
             print('-------------- GENERATION N. {} -------------'.format(self.gen + 1))
             
             # evaluate the task
-            eval_func(self.pool)
-            
+            eval_func(self.pool, graph)
             # info
             if Options.show_best_distribution:
                 scan_best_agent(Options.environment , self.pool)
