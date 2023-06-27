@@ -2,7 +2,7 @@
 
 
 import numpy as np
-import gym
+#import gym
 import matplotlib.pyplot as plt
 import math
 import csv
@@ -26,10 +26,10 @@ def run_qvc(qvc, graph, alpha=0):
     if alpha:
         single_edge_samples = []
         for edge in graph:
-            prediction = qvc.predict(edge)
-            single_edge_samples.append(prediction)
+            prediction = qvc.predict(edge) 
+            single_edge_samples.append(prediction) 
         hamiltonians = []
-        for list_of_measurements in zip(single_edge_samples):
+        for list_of_measurements in zip(*single_edge_samples):
             
             hamiltonians.append( sum( [0.5 * (1- z_iz_j) for z_iz_j in list_of_measurements] ).item() )
             
@@ -90,9 +90,10 @@ def test_best_agent(qvc, num_nodes, graph):
     print('average energy:', average_energy)
     global avg
     avg.append(average_energy)
-    #with open ('Caveman3TestAverageEnergy.csv', 'w', newline='') as file:
-     #   writer = csv.writer(file)
-      #  writer.writerow(avg)   
+    # uncomment to save the average energy
+    # with open ('AverageEnergy.csv', 'w', newline='') as file:
+    #   writer = csv.writer(file)
+    #   writer.writerow(avg)   
 
     # print optimal parameters and most frequently sampled bitstring
     counts = np.bincount(np.array(bit_strings))
@@ -100,9 +101,10 @@ def test_best_agent(qvc, num_nodes, graph):
     
     print("Most frequently sampled bit string is: {:08b}".format(most_freq_bit_string))
     
-#    with open ('RandomTestBitstring.csv', 'w', newline='') as file1:
-#        writer = csv.writer(file1)
-#        writer.writerow([most_freq_bit_string])
+    # uncomment to save the resulting bitstring from the final epoch
+    # with open ('Bitstring.csv', 'w', newline='') as file1:
+    #    writer = csv.writer(file1)
+    #    writer.writerow([most_freq_bit_string])
     
     xticks = range(0, 2**num_nodes)
     xtick_labels = list(map(lambda x: format(x, "0{}b".format(num_nodes)), xticks))

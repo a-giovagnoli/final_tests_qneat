@@ -6,7 +6,7 @@ import math
 import copy
 import numpy as np
 import pennylane as qml
-import gym
+#import gym
 import matplotlib.pyplot as plt
 import csv
 
@@ -317,6 +317,8 @@ class Brain:
                     weight = rot['weights']          
         global mut_weights
         mut_weights = [weight[0], weight[1], weight[2]]
+        
+        ## save mutation weights for the next iteration
         with open('Weights.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(mut_weights)    
@@ -397,7 +399,7 @@ class Brain:
                 theta_x, theta_y, theta_z = self.gates['rot'][rot_index]['weights']
                 qml.Rot(theta_x, theta_y, theta_z, wires=self.gates['rot'][rot_index]['wire'])
                 
-                
+## the following circuit is the original QNEAT circuit with the additional feature map                
     def _circuit(self, inputs=None):
                   
         # there is no encoding here
@@ -439,6 +441,12 @@ class Brain:
 
         return qml.expval(H)
 
+################################################################################################
+####                                                                                        ####
+####                      the following circuit is pretrained                               ####    
+####                                                                                        ####    
+################################################################################################
+
 ##    def _circuit(self, inputs=None):
 ##        for i in range(Options.num_inputs):
 ##            qml.Hadamard(wires=i)
@@ -458,50 +466,74 @@ class Brain:
 ##        for i in range(Options.num_inputs):
 ##            qml.CNOT(wires=[i, (i+1)%8])
 ##
-##        qml.Rot(2.01, -0.18, 2.02, wires=0)
-##        qml.Rot(-0.43, 2.88, -1.76, wires=1)
-##        qml.Rot(2.39, -3.03, -2.23, wires=2)
-##        qml.Rot(1.86, -0.62, -0.23, wires=3)
-##        qml.Rot(1.03, -2.95, 0.75, wires=4)
-##        qml.Rot(-0.69, -2.76, 3.01, wires=5)
-##        qml.Rot(-1.41, -3.12, -2.37, wires=6)
-##        qml.Rot(1.62, 1.89, 0.77, wires=7)
-##
-##        for i in range(Options.num_inputs):
-##            qml.CNOT(wires=[i, (i+1)%8])
-##
-##        qml.Rot(-1.93, 0.83, 1.78, wires=0)
-##        qml.Rot(-1.28, -0.35, -1.98, wires=1)
-##        qml.Rot(1.52, -2.71, -2.24, wires=2)
-##        qml.Rot(1.08, -3.04, -1.40, wires=3)
-##        qml.Rot(-1.26, 0.48, 1.76, wires=4)
-##        qml.Rot(-1.00, -1.84, 0.15, wires=5)
-##        qml.Rot(-0.85, 0.93, 0.79, wires=6)
-##        qml.Rot(-2.41, 1.55, 1.62, wires=7)
-##
-##        qml.CNOT(wires=[0,1])
-##        qml.CNOT(wires=[3,4])
-##        qml.CNOT(wires=[5,6])
-##        qml.CNOT(wires=[7,0])
-##
-##        qml.CNOT(wires=[0,1])
-##        qml.Rot(0.38, 1.70, 0.98, wires=2)
-##        qml.CNOT(wires=[3,4])
-##        qml.Rot(1.55, -0.97, 1.10, wires=5)
-##        qml.Rot(2.68, 1.71, 1.72, wires=7)
-##
-##        qml.CNOT(wires=[5,6])
-##        qml.CNOT(wires=[7,0])
-##
-##        qml.CNOT(wires=[0,1])
-##        qml.CNOT(wires=[2,3])
-##        qml.Rot(-2.50, -0.44, 2.17, wires=4)
-##        qml.Rot(2.10, -1.03, -1.95, wires=5)
-##        qml.Rot(-2.45, -0.87, -1.06, wires=6)
-##        qml.Rot(0.44, -0.22, -0.85, wires=7)
-##        qml.Rot(-1.28, 1.36, -0.06, wires=3)
-##        qml.CNOT(wires=[2,3])
-##
+##        qml.CNOT(wires = [0, 1])
+##        qml.CNOT(wires = [1, 2])
+##        qml.CNOT(wires = [2, 3])
+##        qml.CNOT(wires = [3, 4])
+##        qml.CNOT(wires = [4, 5])
+##        qml.CNOT(wires = [5, 6])
+##        qml.CNOT(wires = [6, 7])
+##        qml.CNOT(wires = [7, 0])
+##        qml.Rot(-1.81877198, -2.09880025, 1.62806948, wires=0)
+##        qml.Rot(-0.85396962, -2.93316033, 1.74560563, wires=1)
+##        qml.Rot(-0.89040408, -1.66499548, 1.45023039, wires=2)
+##        qml.Rot(-1.34591333, 1.80183085, -1.28780316, wires=3)
+##        qml.Rot(-0.33684414, -2.2518475, 0.68849814, wires=4)
+##        qml.Rot(-2.09879252, -2.74982311, -1.30287686, wires=5)
+##        qml.Rot(2.56501416, -0.73304696, -2.69551005, wires=6)
+##        qml.Rot(-2.24185585, -2.06997122, -2.5541789, wires=7)
+##        qml.CNOT(wires = [0, 1])
+##        qml.CNOT(wires = [1, 2])
+##        qml.CNOT(wires = [2, 3])
+##        qml.CNOT(wires = [3, 4])
+##        qml.CNOT(wires = [4, 5])
+##        qml.CNOT(wires = [5, 6])
+##        qml.CNOT(wires = [6, 7])
+##        qml.CNOT(wires = [7, 0])
+##        qml.Rot(-0.26389069437688056, 2.076059338085625, 3.0319820541671656, wires=0)
+##        qml.Rot(-2.29650283, -1.02404911, 2.46227138, wires=1)
+##        qml.Rot(-0.74759364, 0.59249434, -2.38139785, wires=2)
+##        qml.Rot(2.97621168, 1.74863029, -2.35798027, wires=3)
+##        qml.Rot(2.23790175, -1.37511776, 0.13180021, wires=4)
+##        qml.Rot(-0.82947198, 0.27575124, -1.74537692, wires=5)
+##        qml.Rot(-1.06195298, -0.76374445, -2.34961979, wires=6)
+##        qml.Rot(-1.04020438, 2.26549634, -2.24423832, wires=7)
+##        qml.CNOT(wires = [0, 1])
+##        qml.CNOT(wires = [3, 4])
+##        qml.Rot(-1.5977368944353703, 2.7178315418655656, 0.7335230171448104, wires=0)
+##        qml.CNOT(wires = [1, 2])
+##        qml.Rot(0.18426389, -0.18651029, 1.67065533, wires=3)
+##        qml.CNOT(wires = [4, 5])
+##        qml.Rot(3.04003561, -2.87929468, -1.51457137, wires=1)
+##        qml.Rot(-2.69249263, -0.36376189, 0.67718989, wires=2)
+##        qml.Rot(-2.17757397, 1.28063702, 0.53500865, wires=4)
+##        qml.CNOT(wires = [5, 6])
+##        qml.CNOT(wires = [1, 2])
+##        qml.Rot(2.1097648, -0.21134067, 0.01650762, wires=4)
+##        qml.Rot(-0.66616656, 2.20301045, 2.99157453, wires=5)
+##        qml.CNOT(wires = [6, 7])
+##        qml.CNOT(wires = [0, 1])
+##        qml.Rot(2.72851749, 1.7211524, -2.42143562, wires=2)
+##        qml.Rot(-2.54315627, -0.33492014, 1.27553156, wires=6)
+##        qml.Rot(-0.8387802, 0.34395651, -1.85443775, wires=7)
+##        qml.Rot(-0.58805529, -2.95251772, -0.87859343, wires=0)
+##        qml.CNOT(wires = [1, 2])
+##        qml.CNOT(wires = [5, 6])
+##        qml.Rot(1.4224279879206834, 2.3212750120222347, 3.073044358025544, wires=1)
+##        qml.Rot(-1.047579123384796, -3.12150501870214, 2.9226151690877993, wires=5)
+##        qml.CNOT(wires = [6, 7])
+##        qml.CNOT(wires = [4, 5])
+##        qml.Rot(-1.99886359, 2.11186623, 0.11415383, wires=7)
+##        qml.CNOT(wires = [5, 6])
+##        qml.Rot(-1.41909344, -0.78769634, -3.00959879, wires=6)
+##        qml.CNOT(wires = [5, 6])
+##        qml.CNOT(wires = [6, 7])
+##        qml.Rot(0.79597108, -1.3282444, 0.43886158, wires=6)
+##        qml.CNOT(wires = [7, 0])
+##        qml.Rot(-1.9279876025991163, 0.45620883459685296, 1.323207750036913, wires=0)
+##        qml.Rot(-1.18421405, -3.02044304, 2.75112554, wires=4)
+##        qml.CNOT(wires = [5, 6])
+##        qml.Rot(2.80446356, 2.94015694, 0.88364029, wires=5)
 ##        if inputs is None:
 ##            return qml.sample()
 ##

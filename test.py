@@ -3,6 +3,7 @@ from NEATQuantum_v0 import *
 
 import csv
 
+### 100 random graphs created with networx.generators.random_graphs.erdos_renyi_graph
 gra = [
        [(0, 1), (0, 3), (0, 4), (0, 5), (0, 7), (1, 5), (1, 6), (1, 7), (2, 5), (2, 6), (4, 5), (4, 6), (5, 7), (6, 7)],
        [(0, 1), (1, 4), (1, 5), (1, 6), (1, 7), (2, 3), (2, 6), (2, 7), (3, 7), (4, 6)],
@@ -107,16 +108,8 @@ gra = [
        ]
 
 
-#with open('RandomGraphs.csv') as graphfile:
-#    graphs = csv.reader(graphfile)
-#    for row in graphs:
-#        #TODO string to list
-#        gra.append(row[0][1:-1])
-
-
-
+### train QNEAT with 100 graphs  
 weights = []
 for i in range(0, 100):
     set_graph(gra[i])
     mainfunction(graph=gra[i])
-    #Brain.set_weights(weights)

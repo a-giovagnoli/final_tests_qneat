@@ -1,0 +1,2 @@
+## This folder contains the following data:
+- using the final circuit from TL with 100 graphs to get the average energy, mean score, and best fitness for the Random, Barbell, Caveman, and Ladder graphs
