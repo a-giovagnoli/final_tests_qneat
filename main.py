@@ -16,7 +16,7 @@ from NEATQuantum_v0 import *
 # graph
 n_nodes = 8
 #random
-graph = [(0,1), (0,6), (0,7), (1,2), (1,6), (2,4), (2,7), (3,7), (3,6), (4,5), (4,6), (5,1), (5,6), (5,7), (6,7)]
+graph = [(0,1), (0,6), (0,7), (1,2), (1,6), (2,4), (2,7), (3,7), (3,6), (4,5), (4,6), (1,5), (5,6), (5,7), (6,7)]
 #ladder
 #graph = [(0,1), (0,7), (1,2), (2,3), (2,7), (3,4), (3,6), (4,5), (5,6), (6,7)]
 #barbell
@@ -46,9 +46,9 @@ def set_graph(gra):
 # population parameters
 QUBITS = n_nodes
 GRAPH = graph
-N_AGENTS = 5
+N_AGENTS = 100
 TOP_LIMIT = 5
-NUM_GENERATIONS = 5
+NUM_GENERATIONS = 100
 
 INITIAL_LAYERS = 2
 MUTATION_POWER = 0.01
@@ -127,14 +127,15 @@ def evaluate_main(agents, graph):
     n_cnots = len(best_agent.gates['cnot'])
     
     ### show the best agent (print circuit)
-    # drawer = qml.draw(best_agent.qnode)
-    # print(drawer([0 for i in range(Options.num_inputs)]))
+    drawer = qml.draw(best_agent.qnode)
+    print(drawer([0 for i in range(Options.num_inputs)]))
+
     
     ### save innovation table from the final circuit
-    # with open ('FinalCircuit.csv', 'w', newline='') as file1:
-    #     writer = csv.writer(file1)
-    #     writer.writerow(best_agent.gates['rot'])
-    #     writer.writerow(best_agent.gates['cnot'])
+    with open ('FinalCircuit.csv', 'w', newline='') as file1:
+        writer = csv.writer(file1)
+        writer.writerow(best_agent.gates['rot'])
+        writer.writerow(best_agent.gates['cnot'])
     
     # test best agent
     average_energy = test_best_agent(best_agent, n_nodes, graph)
@@ -240,3 +241,4 @@ def mainfunction(graph):
                 best = p.evaluate(evaluate_main, graph)
 
 #     run.finish()
+#mainfunction(graph=graph)

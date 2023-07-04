@@ -213,12 +213,10 @@ class Brain:
         
         self.qnode = qml.QNode(self._circuit, self.device, interface="torch")
         self.qnode_test = qml.QNode(self._circuit, self.device_test, interface="torch")
-    
         # Remember: by default I start with two initial layers available. One that is actually full of gates, the other ones is at the end and empty, but available.
         
         self.layers_indices = set(layers)
-        self.gates= gates # dictionary
-                
+        self.gates= gates # dictionary   
         # if no information is given
         if gates is not None:
             return
@@ -235,7 +233,6 @@ class Brain:
     def _add_gate(self, gate_type):
    
         valid = []
-
         # check for all the valid connections
         for layer in self.layers_indices:
             for wire in range(Options.num_inputs):
@@ -295,10 +292,9 @@ class Brain:
     def set_weights(weights):
         global mut_weights
         mut_weights = weights 
-    
+
     def mutate(self):
         # with a probability threshold, add a new rotation gate
-        weight = []
         if random.random() < Options.add_rot_prob and len(self.gates['rot']) < Options.max_rots:
             self._add_gate('rot')
 
@@ -366,7 +362,16 @@ class Brain:
         rot_layers = [rot['layer'] for rot in self.gates['rot']]
         
         for layer in self.layers_indices:
-                                        
+
+            if (2 in self.layers_indices) & (layer == 2):
+               self._feature_map(np.pi/10, Options.graph) 
+
+            if (5 in self.layers_indices) & (layer == 5):
+               self._feature_map(np.pi/10, Options.graph)  
+
+            if (8 in self.layers_indices) & (layer == 8):
+               self._feature_map(np.pi/10, Options.graph)
+
             # CNOTS
             # find the indices of the cnots supposed to be in that layer
             cnots_indices = np.where(np.array(cnot_layers) == layer)[0] # the [0] is as before
@@ -398,7 +403,7 @@ class Brain:
                 
                 theta_x, theta_y, theta_z = self.gates['rot'][rot_index]['weights']
                 qml.Rot(theta_x, theta_y, theta_z, wires=self.gates['rot'][rot_index]['wire'])
-                
+
 ## the following circuit is the original QNEAT circuit with the additional feature map                
     def _circuit(self, inputs=None):
                   
@@ -771,7 +776,7 @@ class Population:
             print('-------------- GENERATION N. {} -------------'.format(self.gen + 1))
             
             # evaluate the task
-            eval_func(self.pool, graph)
+            eval_func(self.pool, graph)            
             # info
             if Options.show_best_distribution:
                 scan_best_agent(Options.environment , self.pool)
